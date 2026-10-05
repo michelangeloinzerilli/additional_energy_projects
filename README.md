@@ -4,6 +4,8 @@ This repository contains a collection of academic projects developed throughout 
 
 The projects cover different areas of energy engineering, including:
 
+- Power Systems stability analysis
+- CHP thermo-econonomic optimisation
 - Energy system modelling and optimization
 - Energy policy analysis
 - Energy efficiency
@@ -17,6 +19,32 @@ For most projects, the repository contains the **final PDF report**.
 For selected modelling and optimization projects, the corresponding **model files and inputs** are also included.
 
 ---
+
+### Power System Stability and Control
+
+Analysis of **power system dynamics and stability** using MATLAB Simulink.
+
+The project investigates synchronous generator behaviour under different operating conditions, with particular attention to frequency stability, system inertia, active and reactive power regulation, droop control, and the interaction between synchronous generators and Voltage Source Converters (VSCs).
+
+**Main topics:**  
+`Power System Dynamics · Synchronous Generators · Frequency Stability · System Inertia · Droop Control · Voltage Source Converters · MATLAB Simulink`
+
+**Files included:** PDF report.
+
+---
+
+### Thermal Conversion and Industrial Energy Systems Analysis
+
+Thermo-economic optimization of a **gas turbine power plant** using MATLAB.
+
+The project optimizes key plant design parameters while considering investment, maintenance and fuel costs. The analysis is extended through sensitivity studies of methane prices and CO/NOx emission penalties to investigate how economic and environmental signals influence optimal plant design.
+
+**Main topics:**  
+`MATLAB · fmincon · Thermo-Economic Optimization · Gas Turbines · Industrial Energy Systems · Sensitivity Analysis · Emission Costs`
+
+**Files included:**  
+- PDF report
+- MATLAB scripts for optimization and sensitivity analyses
 
 ## Projects
 
