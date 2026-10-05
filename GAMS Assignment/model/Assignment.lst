@@ -1,0 +1,129 @@
+GAMS 49.2.0  9b2b0844 Mar 5, 2025           DAX-DAC arm 64bit/macOS - 04/15/25 22:27:25 Page 1
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+   1  Set t /t1*t24/;
+   2   
+   3  Parameter rawPrice(t), price(t);
+   4   
+   5  * Define your working path
+   7   
+   8  * Step 1: Use gdxxrw to convert Excel sheet to GDX
+****  CALL=127gdxxrw.exe input="C:/Users/michelangeloinze/Desktop/Energy_Policy/GAMS_assignment/model/Day_Ahed_Electricity_Prices.xlsx" output="C:/Users/michelangeloinze/Desktop/Energy_Policy/GAMS_assignment/model/in.gdx" par=rawPrice rng=MGP-PUNPUN!B2:C25 rdim=1 cdim=0
+****  Above call failed, RC=127
+****  ERRORLEVEL set to 1
+   9  $call gdxxrw.exe input="C:/Users/michelangeloinze/Desktop/Energy_Policy/GAMS_assignment/model/Day_Ahed_Electricity_Prices.xlsx" output="C:/Users/michelangeloinze/Desktop/Energy_Policy/GAMS_assignment/model/in.gdx" par=rawPrice rng=MGP-PUNPUN!B2:C25 rdim=1 cdim=0
+****                                                                                                                                                                                                                                                                       $330
+**** 330  CALL failed
+  10   
+  11  * Step 2: Load from GDX into GAMS
+**** File: /Users/michelangeloinze/Desktop/Energy_Policy/GAMS_assignment/model/C:/Users/michelangeloinze/Desktop/Energy_Policy/GAMS_assignment/model/in.gdx
+**** Msg : No such file or directory
+  12  $gdxin "C:/Users/michelangeloinze/Desktop/Energy_Policy/GAMS_assignment/model/in.gdx"
+****                                                                                      $510
+**** 510  Unable to open gdx file for $GDXIN
+  13  $load rawPrice
+****      $502
+**** 502  GDXIN  file not open - ignore rest of line
+  15   
+  16  * Convert €/MWh → €/kWh
+  17  price(t) = rawPrice(t) / 1000;
+****                    $141
+**** 141  Symbol declared but no values have been assigned. Check for missing
+****         data definition, assignment, data loading or implicit assignment
+****         via a solve statement. Suppress with $onImplicitAssign.
+****         A wild shot: You may have spurious commas in the explanatory
+****         text of a declaration. Check symbol reference list.
+  18   
+  19  Set
+  20      a  appliances    /fridge, dishwasher, washer, HVAC, ev/;
+  21   
+  22  * Power usage of appliances [kWh per hour]
+  23  Parameter
+  24      power(a) /
+  25          fridge     0.8,
+  26          dishwasher 1.8,
+  27          washer     1.0,
+  28          HVAC       2.0,
+  29          ev         7.2
+  30      /;
+  31   
+  32  * Required runtime per appliance during the day [hours]
+  33  Parameter
+  34      runtime(a) /
+  35          fridge     24,
+  36          dishwasher 2,
+  37          washer     1,
+  38          HVAC       3,
+  39          ev         4
+  40      /;
+  41   
+  42  * Time window matrix (1 if appliance 'a' is allowed to run in time 't')
+  43  Parameter timewindow(a,t);
+  44   
+  45  * Default all to 0
+  46  timewindow(a,t) = 0;
+  47   
+  48  * Appliance time windows using $ conditional
+  49  timewindow("fridge",t)     = 1;
+  50  timewindow("dishwasher",t)$(ord(t) >= 8 and ord(t) <= 22) = 1;
+  51  timewindow("washer",t)    $(ord(t) >= 7 and ord(t) <= 21) = 1;
+  52  timewindow("HVAC",t)    $(ord(t) >= 6 and ord(t) <= 23) = 1;
+  53  timewindow("ev",t)        $(ord(t) <= 7 or ord(t) >= 22) = 1;
+  54   
+  55  * Binary decision variable: x(a,t) = 1 if appliance a runs at time t
+  56  Binary Variable x(a,t);
+  57   
+  58  * Objective variable: total electricity cost
+  59  Variable totalCost;
+  60   
+  61  Equation
+  62      obj                   "Objective function"
+  63      applianceRuntime(a)   "Ensure each appliance runs for required hours"
+  64      timeWindowLimit(a,t)  "Only allow appliances to run within allowed time slots";
+  65   
+  66  * Objective function: Minimize total cost
+  67  obj..
+  68      totalCost =e= sum((a,t), x(a,t) * power(a) * price(t));
+  69   
+  70  * Each appliance must run for exactly its required runtime
+  71  applianceRuntime(a)..
+  72      sum(t, x(a,t)) =e= runtime(a);
+  73   
+  74  * Respect allowed time windows
+  75  timeWindowLimit(a,t)..
+  76      x(a,t) =l= timewindow(a,t);
+  77   
+  78  Model HomeEnergy /all/;
+  79   
+  80  Solve HomeEnergy using mip minimizing totalCost;
+****                                                 $257
+**** 257  Solve statement not checked because of previous errors
+  81   
+  82  * Display results
+  83  Display x.l, totalCost.l;
+****            $141         $141
+**** 141  Symbol declared but no values have been assigned. Check for missing
+****         data definition, assignment, data loading or implicit assignment
+****         via a solve statement. Suppress with $onImplicitAssign.
+****         A wild shot: You may have spurious commas in the explanatory
+****         text of a declaration. Check symbol reference list.
+
+**** 7 ERROR(S)   0 WARNING(S)
+
+
+COMPILATION TIME     =        0.008 SECONDS      3 MB  49.2.0 9b2b0844 DAX-DAC
+
+
+USER: Academic User                                  G250415+0003Ac-GEN
+      michelangelo.inzerilli@estudiantat.upc.edu              CLA109318
+      License for teaching and research at degree granting institutions
+
+
+**** FILE SUMMARY
+
+Input      /Users/michelangeloinze/Desktop/Energy_Policy/GAMS_assignment/model/Assignment.gms
+Output     /Users/michelangeloinze/Desktop/Energy_Policy/GAMS_assignment/model/Assignment.lst
+
+**** USER ERROR(S) ENCOUNTERED

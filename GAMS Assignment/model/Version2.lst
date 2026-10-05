@@ -1,0 +1,549 @@
+GAMS 49.2.0  9b2b0844 Mar 5, 2025           DAX-DAC arm 64bit/macOS - 04/16/25 16:04:53 Page 1
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+   1  Set t /t1*t24/;
+   2  Parameter price(t);
+   3   
+INCLUDE    /Users/michelangeloinze/Desktop/Energy_Policy/GAMS_assignment/model/priceData.inc
+   5  price('t1') = 0.11000;
+   6  price('t2') = 0.10198;
+   7  price('t3') = 0.09830;
+   8  price('t4') = 0.09913;
+   9  price('t5') = 0.09830;
+  10  price('t6') = 0.10774;
+  11  price('t7') = 0.12100;
+  12  price('t8') = 0.13893;
+  13  price('t9') = 0.13571;
+  14  price('t10') = 0.12435;
+  15  price('t11') = 0.11497;
+  16  price('t12') = 0.10737;
+  17  price('t13') = 0.09500;
+  18  price('t14') = 0.09395;
+  19  price('t15') = 0.09585;
+  20  price('t16') = 0.09913;
+  21  price('t17') = 0.09911;
+  22  price('t18') = 0.10002;
+  23  price('t19') = 0.11826;
+  24  price('t20') = 0.15305;
+  25  price('t21') = 0.15000;
+  26  price('t22') = 0.11910;
+  27  price('t23') = 0.11038;
+  28  price('t24') = 0.09859;
+  29   
+  30  Set
+  31      a  appliances    /fridge, dishwasher, washer, HVAC, ev/;
+  32   
+  33  * Power usage of appliances [kWh per hour]
+  34  Parameter
+  35      power(a) /
+  36          fridge     0.8,
+  37          dishwasher 1.8,
+  38          washer     1.0,
+  39          HVAC       2.0,
+  40          ev         7.2
+  41      /;
+  42   
+  43  * Required runtime per appliance during the day [hours]
+  44  Parameter
+  45      runtime(a) /
+  46          fridge     24,
+  47          dishwasher 2,
+  48          washer     1,
+  49          HVAC       3,
+  50          ev         4
+  51      /;
+  52   
+  53  * Time window matrix (1 if appliance 'a' is allowed to run in time 't')
+  54  Parameter timewindow(a,t);
+  55   
+  56  * Default all to 0
+  57  timewindow(a,t) = 0;
+  58   
+  59  * Appliance time windows using $ conditional
+  60  timewindow("fridge",t)     = 1;
+  61  timewindow("dishwasher",t)$(ord(t) >= 8 and ord(t) <= 22) = 1;
+  62  timewindow("washer",t)    $(ord(t) >= 7 and ord(t) <= 21) = 1;
+  63  timewindow("HVAC",t)    $(ord(t) >= 6 and ord(t) <= 23) = 1;
+  64  timewindow("ev",t)        $(ord(t) <= 7 or ord(t) >= 22) = 1;
+  65   
+  66  * Binary decision variable: x(a,t) = 1 if appliance a runs at time t
+  67  Binary Variable x(a,t);
+  68   
+  69  * Objective variable: total electricity cost
+  70  Variable totalCost;
+  71   
+  72  Equation
+  73      obj                   "Objective function"
+  74      applianceRuntime(a)   "Ensure each appliance runs for required hours"
+  75      timeWindowLimit(a,t)  "Only allow appliances to run within allowed time slots";
+  76   
+  77  * Objective function: Minimize total cost
+  78  obj..
+  79      totalCost =e= sum((a,t), x(a,t) * power(a) * price(t));
+  80   
+  81  * Each appliance must run for exactly its required runtime
+  82  applianceRuntime(a)..
+  83      sum(t, x(a,t)) =e= runtime(a);
+  84   
+  85  * Respect allowed time windows
+  86  timeWindowLimit(a,t)..
+  87      x(a,t) =l= timewindow(a,t);
+  88   
+  89  Model HomeEnergy /all/;
+  90   
+  91  Solve HomeEnergy using mip minimizing totalCost;
+  92   
+  93  * Display results
+  94  Display x.l, totalCost.l;
+GAMS 49.2.0  9b2b0844 Mar 5, 2025           DAX-DAC arm 64bit/macOS - 04/16/25 16:04:53 Page 2
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Include File Summary
+
+
+   SEQ   GLOBAL TYPE      PARENT   LOCAL  FILENAME
+
+     1        1 INPUT          0       0  /Users/michelangeloinze/Desktop/Energy_Policy/GAMS_assignment/model/Version2.gms
+     2        4 INCLUDE        1       4  ./Users/michelangeloinze/Desktop/Energy_Policy/GAMS_assignment/model/priceData.inc
+
+
+COMPILATION TIME     =        0.001 SECONDS      3 MB  49.2.0 9b2b0844 DAX-DAC
+GAMS 49.2.0  9b2b0844 Mar 5, 2025           DAX-DAC arm 64bit/macOS - 04/16/25 16:04:53 Page 3
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Equation Listing    SOLVE HomeEnergy Using MIP From line 91
+
+
+---- obj  =E=  Objective function
+
+obj..  - 0.088*x(fridge,t1) - 0.081584*x(fridge,t2) - 0.07864*x(fridge,t3) - 0.079304*x(fridge,t4) - 0.07864*x(fridge,t5) - 0.086192*x(fridge,t6) - 0.0968*x(fridge,t7) - 0.111144*x(fridge,t8) - 0.108568*x(fridge,t9) - 0.09948*x(fridge,t10) - 0.091976*x(fridge,t11) - 0.085896*x(fridge,t12) - 0.076*x(fridge,t13) - 0.07516*x(fridge,t14) - 0.07668*x(fridge,t15) - 0.079304*x(fridge,t16) - 0.079288*x(fridge,t17) - 0.080016*x(fridge,t18) - 0.094608*x(fridge,t19) - 0.12244*x(fridge,t20) - 0.12*x(fridge,t21) - 0.09528*x(fridge,t22) - 0.088304*x(fridge,t23) - 0.078872*x(fridge,t24) - 0.198*x(dishwasher,t1) - 0.183564*x(dishwasher,t2) - 0.17694*x(dishwasher,t3) - 0.178434*x(dishwasher,t4) - 0.17694*x(dishwasher,t5) - 0.193932*x(dishwasher,t6) - 0.2178*x(dishwasher,t7) - 0.250074*x(dishwasher,t8) - 0.244278*x(dishwasher,t9) - 0.22383*x(dishwasher,t10) - 0.206946*x(dishwasher,t11) - 0.193266*x(dishwasher,t12) - 0.171*x(dishwasher,t13) - 0.16911*x(dishwasher,t14) - 0.17253*x(dishwasher,t15) - 0.178434*x(dishwasher,t16) - 0.178398*x(dishwasher,t17) - 0.180036*x(dishwasher,t18) - 0.212868*x(dishwasher,t19) - 0.27549*x(dishwasher,t20) - 0.27*x(dishwasher,t21) - 0.21438*x(dishwasher,t22) - 0.198684*x(dishwasher,t23) - 0.177462*x(dishwasher,t24) - 0.11*x(washer,t1) - 0.10198*x(washer,t2) - 0.0983*x(washer,t3) - 0.09913*x(washer,t4) - 0.0983*x(washer,t5) - 0.10774*x(washer,t6) - 0.121*x(washer,t7) - 0.13893*x(washer,t8) - 0.13571*x(washer,t9) - 0.12435*x(washer,t10) - 0.11497*x(washer,t11) - 0.10737*x(washer,t12) - 0.095*x(washer,t13) - 0.09395*x(washer,t14) - 0.09585*x(washer,t15) - 0.09913*x(washer,t16) - 0.09911*x(washer,t17) - 0.10002*x(washer,t18) - 0.11826*x(washer,t19) - 0.15305*x(washer,t20) - 0.15*x(washer,t21) - 0.1191*x(washer,t22) - 0.11038*x(washer,t23) - 0.09859*x(washer,t24) - 0.22*x(HVAC,t1) - 0.20396*x(HVAC,t2) - 0.1966*x(HVAC,t3) - 0.19826*x(HVAC,t4) - 0.1966*x(HVAC,t5) - 0.21548*x(HVAC,t6) - 0.242*x(HVAC,t7) - 0.27786*x(HVAC,t8) - 0.27142*x(HVAC,t9) - 0.2487*x(HVAC,t10) - 0.22994*x(HVAC,t11) - 0.21474*x(HVAC,t12) - 0.19*x(HVAC,t13) - 0.1879*x(HVAC,t14) - 0.1917*x(HVAC,t15) - 0.19826*x(HVAC,t16) - 0.19822*x(HVAC,t17) - 0.20004*x(HVAC,t18) - 0.23652*x(HVAC,t19) - 0.3061*x(HVAC,t20) - 0.3*x(HVAC,t21) - 0.2382*x(HVAC,t22) - 0.22076*x(HVAC,t23) - 0.19718*x(HVAC,t24) - 0.792*x(ev,t1) - 0.734256*x(ev,t2) - 0.70776*x(ev,t3) - 0.713736*x(ev,t4) - 0.70776*x(ev,t5) - 0.775728*x(ev,t6) - 0.8712*x(ev,t7) - 1.000296*x(ev,t8) - 0.977112*x(ev,t9) - 0.89532*x(ev,t10) - 0.827784*x(ev,t11) - 0.773064*x(ev,t12) - 0.684*x(ev,t13) - 0.67644*x(ev,t14) - 0.69012*x(ev,t15) - 0.713736*x(ev,t16) - 0.713592*x(ev,t17) - 0.720144*x(ev,t18) - 0.851472*x(ev,t19) - 1.10196*x(ev,t20) - 1.08*x(ev,t21) - 0.85752*x(ev,t22) - 0.794736*x(ev,t23) - 0.709848*x(ev,t24) + totalCost =E= 0 ; (LHS = 0)
+     
+
+---- applianceRuntime  =E=  Ensure each appliance runs for required hours
+
+applianceRuntime(fridge)..  x(fridge,t1) + x(fridge,t2) + x(fridge,t3) + x(fridge,t4) + x(fridge,t5) + x(fridge,t6) + x(fridge,t7) + x(fridge,t8) + x(fridge,t9) + x(fridge,t10) + x(fridge,t11) + x(fridge,t12) + x(fridge,t13) + x(fridge,t14) + x(fridge,t15) + x(fridge,t16) + x(fridge,t17) + x(fridge,t18) + x(fridge,t19) + x(fridge,t20) + x(fridge,t21) + x(fridge,t22) + x(fridge,t23) + x(fridge,t24) =E= 24 ; (LHS = 0, INFES = 24 ****)
+     
+applianceRuntime(dishwasher)..  x(dishwasher,t1) + x(dishwasher,t2) + x(dishwasher,t3) + x(dishwasher,t4) + x(dishwasher,t5) + x(dishwasher,t6) + x(dishwasher,t7) + x(dishwasher,t8) + x(dishwasher,t9) + x(dishwasher,t10) + x(dishwasher,t11) + x(dishwasher,t12) + x(dishwasher,t13) + x(dishwasher,t14) + x(dishwasher,t15) + x(dishwasher,t16) + x(dishwasher,t17) + x(dishwasher,t18) + x(dishwasher,t19) + x(dishwasher,t20) + x(dishwasher,t21) + x(dishwasher,t22) + x(dishwasher,t23) + x(dishwasher,t24) =E= 2 ; (LHS = 0, INFES = 2 ****)
+     
+applianceRuntime(washer)..  x(washer,t1) + x(washer,t2) + x(washer,t3) + x(washer,t4) + x(washer,t5) + x(washer,t6) + x(washer,t7) + x(washer,t8) + x(washer,t9) + x(washer,t10) + x(washer,t11) + x(washer,t12) + x(washer,t13) + x(washer,t14) + x(washer,t15) + x(washer,t16) + x(washer,t17) + x(washer,t18) + x(washer,t19) + x(washer,t20) + x(washer,t21) + x(washer,t22) + x(washer,t23) + x(washer,t24) =E= 1 ; (LHS = 0, INFES = 1 ****)
+     
+REMAINING 2 ENTRIES SKIPPED
+
+
+---- timeWindowLimit  =L=  Only allow appliances to run within allowed time slots
+
+timeWindowLimit(fridge,t1)..  x(fridge,t1) =L= 1 ; (LHS = 0)
+     
+timeWindowLimit(fridge,t2)..  x(fridge,t2) =L= 1 ; (LHS = 0)
+     
+timeWindowLimit(fridge,t3)..  x(fridge,t3) =L= 1 ; (LHS = 0)
+     
+REMAINING 117 ENTRIES SKIPPED
+
+GAMS 49.2.0  9b2b0844 Mar 5, 2025           DAX-DAC arm 64bit/macOS - 04/16/25 16:04:53 Page 4
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Column Listing      SOLVE HomeEnergy Using MIP From line 91
+
+
+---- x  
+
+x(fridge,t1)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+       -0.088   obj
+        1       applianceRuntime(fridge)
+        1       timeWindowLimit(fridge,t1)
+
+x(fridge,t2)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+       -0.0816  obj
+        1       applianceRuntime(fridge)
+        1       timeWindowLimit(fridge,t2)
+
+x(fridge,t3)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+       -0.0786  obj
+        1       applianceRuntime(fridge)
+        1       timeWindowLimit(fridge,t3)
+
+REMAINING 117 ENTRIES SKIPPED
+
+---- totalCost  
+
+totalCost
+                (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
+        1       obj
+
+GAMS 49.2.0  9b2b0844 Mar 5, 2025           DAX-DAC arm 64bit/macOS - 04/16/25 16:04:53 Page 5
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Range Statistics    SOLVE HomeEnergy Using MIP From line 91
+
+
+RANGE STATISTICS (ABSOLUTE NON-ZERO FINITE VALUES)
+
+RHS       [min, max] : [ 1.000E+00, 2.400E+01] - Zero values observed as well
+Bound     [min, max] : [ 1.000E+00, 1.000E+00] - Zero values observed as well
+Matrix    [min, max] : [ 7.516E-02, 1.102E+00]
+
+GAMS 49.2.0  9b2b0844 Mar 5, 2025           DAX-DAC arm 64bit/macOS - 04/16/25 16:04:53 Page 6
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Model Statistics    SOLVE HomeEnergy Using MIP From line 91
+
+
+MODEL STATISTICS
+
+BLOCKS OF EQUATIONS           3     SINGLE EQUATIONS          126
+BLOCKS OF VARIABLES           2     SINGLE VARIABLES          121
+NON ZERO ELEMENTS           361     DISCRETE VARIABLES        120
+
+
+GENERATION TIME      =        0.004 SECONDS      4 MB  49.2.0 9b2b0844 DAX-DAC
+GAMS 49.2.0  9b2b0844 Mar 5, 2025           DAX-DAC arm 64bit/macOS - 04/16/25 16:04:53 Page 7
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Solution Report     SOLVE HomeEnergy Using MIP From line 91
+
+
+               S O L V E      S U M M A R Y
+
+     MODEL   HomeEnergy          OBJECTIVE  totalCost
+     TYPE    MIP                 DIRECTION  MINIMIZE
+     SOLVER  CPLEX               FROM LINE  91
+
+**** SOLVER STATUS     1 Normal Completion
+**** MODEL STATUS      1 Optimal
+**** OBJECTIVE VALUE                5.9949
+
+ RESOURCE USAGE, LIMIT          0.001 10000000000.000
+ ITERATION COUNT, LIMIT         0    2147483647
+*** This solver runs with a community license. No commercial use.
+--- GMO setup time: 0.00s
+--- GMO memory 0.53 Mb (peak 0.53 Mb)
+--- Dictionary memory 0.00 Mb
+--- Cplex 22.1.2.0 link memory 0.00 Mb (peak 0.02 Mb)
+--- Starting Cplex
+
+
+--- MIP status (101): integer optimal solution.
+--- Cplex Time: 0.00sec (det. 0.09 ticks)
+
+--- Returning a primal only solution to GAMS (marginals all set to NA).
+--- Fixing integer variables and solving final LP...
+
+
+--- Fixed MIP status (1): optimal.
+--- Cplex Time: 0.00sec (det. 0.09 ticks)
+
+
+Proven optimal solution
+MIP Solution:            5.994940    (0 iterations, 0 nodes)
+Final Solve:             5.994940    (0 iterations)
+
+Best possible:           5.994940
+Absolute gap:            0.000000
+Relative gap:            0.000000
+
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- EQU obj                 .              .              .             1.0000      
+
+  obj  Objective function
+
+---- EQU applianceRuntime  Ensure each appliance runs for required hours
+
+                  LOWER          LEVEL          UPPER         MARGINAL
+
+fridge            24.0000        24.0000        24.0000          .          
+dishwasher         2.0000         2.0000         2.0000          .          
+washer             1.0000         1.0000         1.0000          .          
+HVAC               3.0000         3.0000         3.0000          .          
+ev                 4.0000         4.0000         4.0000          .          
+
+---- EQU timeWindowLimit  Only allow appliances to run within allowed time slots
+
+                      LOWER          LEVEL          UPPER         MARGINAL
+
+fridge    .t1         -INF            1.0000         1.0000          .          
+fridge    .t2         -INF            1.0000         1.0000          .          
+fridge    .t3         -INF            1.0000         1.0000          .          
+fridge    .t4         -INF            1.0000         1.0000          .          
+fridge    .t5         -INF            1.0000         1.0000          .          
+fridge    .t6         -INF            1.0000         1.0000          .          
+fridge    .t7         -INF            1.0000         1.0000          .          
+fridge    .t8         -INF            1.0000         1.0000          .          
+fridge    .t9         -INF            1.0000         1.0000          .          
+fridge    .t10        -INF            1.0000         1.0000          .          
+fridge    .t11        -INF            1.0000         1.0000          .          
+fridge    .t12        -INF            1.0000         1.0000          .          
+fridge    .t13        -INF            1.0000         1.0000          .          
+fridge    .t14        -INF            1.0000         1.0000          .          
+fridge    .t15        -INF            1.0000         1.0000          .          
+fridge    .t16        -INF            1.0000         1.0000          .          
+fridge    .t17        -INF            1.0000         1.0000          .          
+fridge    .t18        -INF            1.0000         1.0000          .          
+fridge    .t19        -INF            1.0000         1.0000          .          
+fridge    .t20        -INF            1.0000         1.0000          .          
+fridge    .t21        -INF            1.0000         1.0000          .          
+fridge    .t22        -INF            1.0000         1.0000          .          
+fridge    .t23        -INF            1.0000         1.0000          .          
+fridge    .t24        -INF            1.0000         1.0000          .          
+dishwasher.t1         -INF             .              .              .          
+dishwasher.t2         -INF             .              .              .          
+dishwasher.t3         -INF             .              .              .          
+dishwasher.t4         -INF             .              .              .          
+dishwasher.t5         -INF             .              .              .          
+dishwasher.t6         -INF             .              .              .          
+dishwasher.t7         -INF             .              .              .          
+dishwasher.t8         -INF             .             1.0000          .          
+dishwasher.t9         -INF             .             1.0000          .          
+dishwasher.t10        -INF             .             1.0000          .          
+dishwasher.t11        -INF             .             1.0000          .          
+dishwasher.t12        -INF             .             1.0000          .          
+dishwasher.t13        -INF            1.0000         1.0000          .          
+dishwasher.t14        -INF            1.0000         1.0000          .          
+dishwasher.t15        -INF             .             1.0000          .          
+dishwasher.t16        -INF             .             1.0000          .          
+dishwasher.t17        -INF             .             1.0000          .          
+dishwasher.t18        -INF             .             1.0000          .          
+dishwasher.t19        -INF             .             1.0000          .          
+dishwasher.t20        -INF             .             1.0000          .          
+dishwasher.t21        -INF             .             1.0000          .          
+dishwasher.t22        -INF             .             1.0000          .          
+dishwasher.t23        -INF             .              .              .          
+dishwasher.t24        -INF             .              .              .          
+washer    .t1         -INF             .              .              .          
+washer    .t2         -INF             .              .              .          
+washer    .t3         -INF             .              .              .          
+washer    .t4         -INF             .              .              .          
+washer    .t5         -INF             .              .              .          
+washer    .t6         -INF             .              .              .          
+washer    .t7         -INF             .             1.0000          .          
+washer    .t8         -INF             .             1.0000          .          
+washer    .t9         -INF             .             1.0000          .          
+washer    .t10        -INF             .             1.0000          .          
+washer    .t11        -INF             .             1.0000          .          
+washer    .t12        -INF             .             1.0000          .          
+washer    .t13        -INF             .             1.0000          .          
+washer    .t14        -INF            1.0000         1.0000          .          
+washer    .t15        -INF             .             1.0000          .          
+washer    .t16        -INF             .             1.0000          .          
+washer    .t17        -INF             .             1.0000          .          
+washer    .t18        -INF             .             1.0000          .          
+washer    .t19        -INF             .             1.0000          .          
+washer    .t20        -INF             .             1.0000          .          
+washer    .t21        -INF             .             1.0000          .          
+washer    .t22        -INF             .              .              .          
+washer    .t23        -INF             .              .              .          
+washer    .t24        -INF             .              .              .          
+HVAC      .t1         -INF             .              .              .          
+HVAC      .t2         -INF             .              .              .          
+HVAC      .t3         -INF             .              .              .          
+HVAC      .t4         -INF             .              .              .          
+HVAC      .t5         -INF             .              .              .          
+HVAC      .t6         -INF             .             1.0000          .          
+HVAC      .t7         -INF             .             1.0000          .          
+HVAC      .t8         -INF             .             1.0000          .          
+HVAC      .t9         -INF             .             1.0000          .          
+HVAC      .t10        -INF             .             1.0000          .          
+HVAC      .t11        -INF             .             1.0000          .          
+HVAC      .t12        -INF             .             1.0000          .          
+HVAC      .t13        -INF            1.0000         1.0000          .          
+HVAC      .t14        -INF            1.0000         1.0000          .          
+HVAC      .t15        -INF            1.0000         1.0000          .          
+HVAC      .t16        -INF             .             1.0000          .          
+HVAC      .t17        -INF             .             1.0000          .          
+HVAC      .t18        -INF             .             1.0000          .          
+HVAC      .t19        -INF             .             1.0000          .          
+HVAC      .t20        -INF             .             1.0000          .          
+HVAC      .t21        -INF             .             1.0000          .          
+HVAC      .t22        -INF             .             1.0000          .          
+HVAC      .t23        -INF             .             1.0000          .          
+HVAC      .t24        -INF             .              .              .          
+ev        .t1         -INF             .             1.0000          .          
+ev        .t2         -INF             .             1.0000          .          
+ev        .t3         -INF            1.0000         1.0000          .          
+ev        .t4         -INF            1.0000         1.0000          .          
+ev        .t5         -INF            1.0000         1.0000          .          
+ev        .t6         -INF             .             1.0000          .          
+ev        .t7         -INF             .             1.0000          .          
+ev        .t8         -INF             .              .              .          
+ev        .t9         -INF             .              .              .          
+ev        .t10        -INF             .              .              .          
+ev        .t11        -INF             .              .              .          
+ev        .t12        -INF             .              .              .          
+ev        .t13        -INF             .              .              .          
+ev        .t14        -INF             .              .              .          
+ev        .t15        -INF             .              .              .          
+ev        .t16        -INF             .              .              .          
+ev        .t17        -INF             .              .              .          
+ev        .t18        -INF             .              .              .          
+ev        .t19        -INF             .              .              .          
+ev        .t20        -INF             .              .              .          
+ev        .t21        -INF             .              .              .          
+ev        .t22        -INF             .             1.0000          .          
+ev        .t23        -INF             .             1.0000          .          
+ev        .t24        -INF            1.0000         1.0000          .          
+
+---- VAR x  
+
+                      LOWER          LEVEL          UPPER         MARGINAL
+
+fridge    .t1           .             1.0000         1.0000         0.0880      
+fridge    .t2           .             1.0000         1.0000         0.0816      
+fridge    .t3           .             1.0000         1.0000         0.0786      
+fridge    .t4           .             1.0000         1.0000         0.0793      
+fridge    .t5           .             1.0000         1.0000         0.0786      
+fridge    .t6           .             1.0000         1.0000         0.0862      
+fridge    .t7           .             1.0000         1.0000         0.0968      
+fridge    .t8           .             1.0000         1.0000         0.1111      
+fridge    .t9           .             1.0000         1.0000         0.1086      
+fridge    .t10          .             1.0000         1.0000         0.0995      
+fridge    .t11          .             1.0000         1.0000         0.0920      
+fridge    .t12          .             1.0000         1.0000         0.0859      
+fridge    .t13          .             1.0000         1.0000         0.0760      
+fridge    .t14          .             1.0000         1.0000         0.0752      
+fridge    .t15          .             1.0000         1.0000         0.0767      
+fridge    .t16          .             1.0000         1.0000         0.0793      
+fridge    .t17          .             1.0000         1.0000         0.0793      
+fridge    .t18          .             1.0000         1.0000         0.0800      
+fridge    .t19          .             1.0000         1.0000         0.0946      
+fridge    .t20          .             1.0000         1.0000         0.1224      
+fridge    .t21          .             1.0000         1.0000         0.1200      
+fridge    .t22          .             1.0000         1.0000         0.0953      
+fridge    .t23          .             1.0000         1.0000         0.0883      
+fridge    .t24          .             1.0000         1.0000         0.0789      
+dishwasher.t1           .              .             1.0000         0.1980      
+dishwasher.t2           .              .             1.0000         0.1836      
+dishwasher.t3           .              .             1.0000         0.1769      
+dishwasher.t4           .              .             1.0000         0.1784      
+dishwasher.t5           .              .             1.0000         0.1769      
+dishwasher.t6           .              .             1.0000         0.1939      
+dishwasher.t7           .              .             1.0000         0.2178      
+dishwasher.t8           .              .             1.0000         0.2501      
+dishwasher.t9           .              .             1.0000         0.2443      
+dishwasher.t10          .              .             1.0000         0.2238      
+dishwasher.t11          .              .             1.0000         0.2069      
+dishwasher.t12          .              .             1.0000         0.1933      
+dishwasher.t13          .             1.0000         1.0000         0.1710      
+dishwasher.t14          .             1.0000         1.0000         0.1691      
+dishwasher.t15          .              .             1.0000         0.1725      
+dishwasher.t16          .              .             1.0000         0.1784      
+dishwasher.t17          .              .             1.0000         0.1784      
+dishwasher.t18          .              .             1.0000         0.1800      
+dishwasher.t19          .              .             1.0000         0.2129      
+dishwasher.t20          .              .             1.0000         0.2755      
+dishwasher.t21          .              .             1.0000         0.2700      
+dishwasher.t22          .              .             1.0000         0.2144      
+dishwasher.t23          .              .             1.0000         0.1987      
+dishwasher.t24          .              .             1.0000         0.1775      
+washer    .t1           .              .             1.0000         0.1100      
+washer    .t2           .              .             1.0000         0.1020      
+washer    .t3           .              .             1.0000         0.0983      
+washer    .t4           .              .             1.0000         0.0991      
+washer    .t5           .              .             1.0000         0.0983      
+washer    .t6           .              .             1.0000         0.1077      
+washer    .t7           .              .             1.0000         0.1210      
+washer    .t8           .              .             1.0000         0.1389      
+washer    .t9           .              .             1.0000         0.1357      
+washer    .t10          .              .             1.0000         0.1244      
+washer    .t11          .              .             1.0000         0.1150      
+washer    .t12          .              .             1.0000         0.1074      
+washer    .t13          .              .             1.0000         0.0950      
+washer    .t14          .             1.0000         1.0000         0.0940      
+washer    .t15          .              .             1.0000         0.0959      
+washer    .t16          .              .             1.0000         0.0991      
+washer    .t17          .              .             1.0000         0.0991      
+washer    .t18          .              .             1.0000         0.1000      
+washer    .t19          .              .             1.0000         0.1183      
+washer    .t20          .              .             1.0000         0.1530      
+washer    .t21          .              .             1.0000         0.1500      
+washer    .t22          .              .             1.0000         0.1191      
+washer    .t23          .              .             1.0000         0.1104      
+washer    .t24          .              .             1.0000         0.0986      
+HVAC      .t1           .              .             1.0000         0.2200      
+HVAC      .t2           .              .             1.0000         0.2040      
+HVAC      .t3           .              .             1.0000         0.1966      
+HVAC      .t4           .              .             1.0000         0.1983      
+HVAC      .t5           .              .             1.0000         0.1966      
+HVAC      .t6           .              .             1.0000         0.2155      
+HVAC      .t7           .              .             1.0000         0.2420      
+HVAC      .t8           .              .             1.0000         0.2779      
+HVAC      .t9           .              .             1.0000         0.2714      
+HVAC      .t10          .              .             1.0000         0.2487      
+HVAC      .t11          .              .             1.0000         0.2299      
+HVAC      .t12          .              .             1.0000         0.2147      
+HVAC      .t13          .             1.0000         1.0000         0.1900      
+HVAC      .t14          .             1.0000         1.0000         0.1879      
+HVAC      .t15          .             1.0000         1.0000         0.1917      
+HVAC      .t16          .              .             1.0000         0.1983      
+HVAC      .t17          .              .             1.0000         0.1982      
+HVAC      .t18          .              .             1.0000         0.2000      
+HVAC      .t19          .              .             1.0000         0.2365      
+HVAC      .t20          .              .             1.0000         0.3061      
+HVAC      .t21          .              .             1.0000         0.3000      
+HVAC      .t22          .              .             1.0000         0.2382      
+HVAC      .t23          .              .             1.0000         0.2208      
+HVAC      .t24          .              .             1.0000         0.1972      
+ev        .t1           .              .             1.0000         0.7920      
+ev        .t2           .              .             1.0000         0.7343      
+ev        .t3           .             1.0000         1.0000         0.7078      
+ev        .t4           .             1.0000         1.0000         0.7137      
+ev        .t5           .             1.0000         1.0000         0.7078      
+ev        .t6           .              .             1.0000         0.7757      
+ev        .t7           .              .             1.0000         0.8712      
+ev        .t8           .              .             1.0000         1.0003      
+ev        .t9           .              .             1.0000         0.9771      
+ev        .t10          .              .             1.0000         0.8953      
+ev        .t11          .              .             1.0000         0.8278      
+ev        .t12          .              .             1.0000         0.7731      
+ev        .t13          .              .             1.0000         0.6840      
+ev        .t14          .              .             1.0000         0.6764      
+ev        .t15          .              .             1.0000         0.6901      
+ev        .t16          .              .             1.0000         0.7137      
+ev        .t17          .              .             1.0000         0.7136      
+ev        .t18          .              .             1.0000         0.7201      
+ev        .t19          .              .             1.0000         0.8515      
+ev        .t20          .              .             1.0000         1.1020      
+ev        .t21          .              .             1.0000         1.0800      
+ev        .t22          .              .             1.0000         0.8575      
+ev        .t23          .              .             1.0000         0.7947      
+ev        .t24          .             1.0000         1.0000         0.7098      
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- VAR totalCost         -INF            5.9949        +INF             .          
+
+
+**** REPORT SUMMARY :        0     NONOPT
+                             0 INFEASIBLE
+                             0  UNBOUNDED
+GAMS 49.2.0  9b2b0844 Mar 5, 2025           DAX-DAC arm 64bit/macOS - 04/16/25 16:04:53 Page 8
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+E x e c u t i o n
+
+
+----     94 VARIABLE x.L  
+
+                    t1          t2          t3          t4          t5          t6          t7          t8          t9         t10         t11         t12         t13         t14         t15         t16         t17         t18         t19         t20         t21         t22         t23         t24
+
+fridge           1.000       1.000       1.000       1.000       1.000       1.000       1.000       1.000       1.000       1.000       1.000       1.000       1.000       1.000       1.000       1.000       1.000       1.000       1.000       1.000       1.000       1.000       1.000       1.000
+dishwasher                                                                                                                                                       1.000       1.000
+washer                                                                                                                                                                       1.000
+HVAC                                                                                                                                                             1.000       1.000       1.000
+ev                                       1.000       1.000       1.000                                                                                                                                                                                                                               1.000
+
+
+----     94 VARIABLE totalCost.L           =        5.995  
+
+
+EXECUTION TIME       =        0.029 SECONDS      4 MB  49.2.0 9b2b0844 DAX-DAC
+
+
+USER: Academic User                                  G250415+0003Ac-GEN
+      michelangelo.inzerilli@estudiantat.upc.edu              CLA109318
+      License for teaching and research at degree granting institutions
+
+
+**** FILE SUMMARY
+
+Input      /Users/michelangeloinze/Desktop/Energy_Policy/GAMS_assignment/model/Version2.gms
+Output     /Users/michelangeloinze/Desktop/Energy_Policy/GAMS_assignment/model/Version2.lst

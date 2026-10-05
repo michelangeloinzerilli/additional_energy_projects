@@ -1,0 +1,65 @@
+
+--- Job Assignment.gms Start 04/15/25 22:27:25 49.2.0 9b2b0844 DAX-DAC arm 64bit/macOS
+--- Applying:
+    /Library/Frameworks/GAMS.framework/Versions/49/Resources/gmsprmun.txt
+--- GAMS Parameters defined
+    Input /Users/michelangeloinze/Desktop/Energy_Policy/GAMS_assignment/model/Assignment.gms
+    PageSize 0
+    ScrDir /Users/michelangeloinze/Desktop/Energy_Policy/GAMS_assignment/model/225a/
+    SysDir /Library/Frameworks/GAMS.framework/Versions/49/Resources/
+    LogOption 3
+    ErrMsg 1
+    ErrorLog 99
+    IDE 1
+    LstTitleLeftAligned 1
+Licensee: Academic User                                  G250415+0003Ac-GEN
+          michelangelo.inzerilli@estudiantat.upc.edu              CLA109318
+          225a/gamslice.dat
+          node:30494001 mem:36 cores:11 ipport:60650 v:2                   
+          Community license for demonstration and instructional purposes only
+System information: 11 physical cores and 36 Gb memory detected
+GAMS 49.2.0   Copyright (C) 1987-2025 GAMS Development. All rights reserved
+--- Starting compilation
+--- Assignment.gms(9) 3 Mb
+--- call gdxxrw.exe input="C:/Users/michelangeloinze/Desktop/Energy_Policy/GAMS_assignment/model/Day_Ahed_Electricity_Prices.xlsx" output="C:/Users/michelangeloinze/Desktop/Energy_Policy/GAMS_assignment/model/in.gdx" par=rawPrice rng=MGP-PUNPUN!B2:C25 rdim=1 cdim=0
+sh: gdxxrw.exe: command not found
+--- Assignment.gms(9) 3 Mb 1 Error
+*** above call failed, RC=127
+*** ERRORLEVEL set to 1
+*** Error 330 in /Users/michelangeloinze/Desktop/Energy_Policy/GAMS_assignment/model/Assignment.gms
+    CALL failed
+--- Assignment.gms(12) 3 Mb
+*** GDXIN failed /Users/michelangeloinze/Desktop/Energy_Policy/GAMS_assignment/model/C:/Users/michelangeloinze/Desktop/Energy_Policy/GAMS_assignment/model/in.gdx
+*** Msg: No such file or directory
+--- Assignment.gms(12) 3 Mb 2 Errors
+*** Error 510 in /Users/michelangeloinze/Desktop/Energy_Policy/GAMS_assignment/model/Assignment.gms
+    Unable to open gdx file for $GDXIN
+--- Assignment.gms(13) 3 Mb 3 Errors
+*** Error 502 in /Users/michelangeloinze/Desktop/Energy_Policy/GAMS_assignment/model/Assignment.gms
+    GDXIN  file not open - ignore rest of line
+--- Assignment.gms(17) 3 Mb 4 Errors
+*** Error 141 in /Users/michelangeloinze/Desktop/Energy_Policy/GAMS_assignment/model/Assignment.gms
+    Symbol declared but no values have been assigned. Check for missing
+       data definition, assignment, data loading or implicit assignment
+       via a solve statement. Suppress with $onImplicitAssign.
+       A wild shot: You may have spurious commas in the explanatory
+       text of a declaration. Check symbol reference list.
+--- Assignment.gms(80) 3 Mb 5 Errors
+*** Error 257 in /Users/michelangeloinze/Desktop/Energy_Policy/GAMS_assignment/model/Assignment.gms
+    Solve statement not checked because of previous errors
+--- Assignment.gms(83) 3 Mb 7 Errors
+*** Error 141 in /Users/michelangeloinze/Desktop/Energy_Policy/GAMS_assignment/model/Assignment.gms
+    Symbol declared but no values have been assigned. Check for missing
+       data definition, assignment, data loading or implicit assignment
+       via a solve statement. Suppress with $onImplicitAssign.
+       A wild shot: You may have spurious commas in the explanatory
+       text of a declaration. Check symbol reference list.
+*** Error 141 in /Users/michelangeloinze/Desktop/Energy_Policy/GAMS_assignment/model/Assignment.gms
+    Symbol declared but no values have been assigned. Check for missing
+       data definition, assignment, data loading or implicit assignment
+       via a solve statement. Suppress with $onImplicitAssign.
+       A wild shot: You may have spurious commas in the explanatory
+       text of a declaration. Check symbol reference list.
+--- Assignment.gms(83) 3 Mb 7 Errors
+*** Status: Compilation error(s)
+--- Job Assignment.gms Stop 04/15/25 22:27:25 elapsed 0:00:00.011

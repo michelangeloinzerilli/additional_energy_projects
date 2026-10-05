@@ -1,0 +1,20 @@
+B 3 C o m p i l a t i o n
+B 102 Include File Summary
+B 114 Equation Listing    SOLVE HomeEnergy Using MIP From line 91
+D 117 obj
+D 122 applianceRuntime
+D 133 timeWindowLimit
+B 145 Column Listing      SOLVE HomeEnergy Using MIP From line 91
+E 148 x
+E 170 totalCost
+B 178 Range Statistics    SOLVE HomeEnergy Using MIP From line 91
+B 189 Model Statistics    SOLVE HomeEnergy Using MIP From line 91
+B 202 Solution Report     SOLVE HomeEnergy Using MIP From line 91
+F 247 obj
+F 251 applianceRuntime
+F 261 timeWindowLimit
+G 386 x
+G 513 totalCost
+B 521 E x e c u t i o n
+I 521 x
+I 534 totalCost
